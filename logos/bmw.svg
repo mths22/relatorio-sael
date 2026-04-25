@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-label="BMW">
+  <defs>
+    <clipPath id="bmwInner">
+      <circle cx="100" cy="100" r="62"/>
+    </clipPath>
+  </defs>
+  <!-- outer black ring -->
+  <circle cx="100" cy="100" r="92" fill="#000000"/>
+  <!-- inner white circle -->
+  <circle cx="100" cy="100" r="78" fill="#ffffff"/>
+  <!-- inner quartered (clipped to circle) -->
+  <g clip-path="url(#bmwInner)">
+    <rect x="38"  y="38"  width="62" height="62" fill="#0166B1"/>
+    <rect x="100" y="38"  width="62" height="62" fill="#ffffff"/>
+    <rect x="38"  y="100" width="62" height="62" fill="#ffffff"/>
+    <rect x="100" y="100" width="62" height="62" fill="#0166B1"/>
+  </g>
+  <!-- thin black outline of inner roundel -->
+  <circle cx="100" cy="100" r="62" fill="none" stroke="#000" stroke-width="2"/>
+  <!-- BMW text -->
+  <g font-family="Helvetica, Arial, sans-serif" font-weight="700" fill="#ffffff" font-size="16" text-anchor="middle">
+    <text x="100" y="28" transform="rotate(-30 100 100)">B</text>
+    <text x="100" y="28">M</text>
+    <text x="100" y="28" transform="rotate(30 100 100)">W</text>
+  </g>
+</svg>
