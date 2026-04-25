@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sael — Relatório KPI Jan–Abr 2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; color: #111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { padding: 32px 40px 80px; max-width: 1320px; margin: 0 auto; }
+
+  /* HEADER */
+  header.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 20px; border-bottom: 1px solid #e5e7eb; margin-bottom: 28px;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .brand .sael-logo { height: 44px; width: auto; display: block; }
+  .brand .divider { width: 1px; height: 36px; background: #d1d5db; }
+  .brand .subtitle { color: #6b7280; font-size: 14px; line-height: 1.4; }
+  .brand .subtitle strong { color: #111; font-weight: 600; display: block; font-size: 15px; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .header-right .brand-logo {
+    height: 60px; width: auto; max-width: 220px; object-fit: contain;
+    display: block;
+    transition: opacity .25s ease, transform .25s ease;
+    opacity: 0; transform: translateY(4px);
+  }
+  .header-right .brand-logo.visible { opacity: 1; transform: translateY(0); }
+  .period { text-align: right; font-size: 12px; color: #6b7280; }
+  .period strong { display: block; color: #111; font-size: 14px; font-weight: 600; }
+
+  /* FILTERS */
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 10px 8px;
+    margin-bottom: 28px; align-items: center;
+  }
+  .filter-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: #6b7280; font-weight: 600; margin-right: 6px;
+  }
+  .chip {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid #d1d5db;
+    background: #fff; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: #374151; transition: all .15s ease; user-select: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip:hover { border-color: #111; }
+  .chip.active { background: #111; color: #fff; border-color: #111; }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+  .chip.active .dot { background: #fff; }
+
+  .filter-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 16px 0 0; }
+  .filter-group + .filter-group { border-left: 1px solid #e5e7eb; padding-left: 16px; }
+
+  /* KPI CARDS */
+  .kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px;
+  }
+  .kpi {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 20px;
+    transition: all .2s ease;
+  }
+  .kpi:hover { border-color: #111; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+  .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; font-weight: 600; }
+  .kpi .value { font-size: 26px; font-weight: 800; color: #111; margin-top: 6px; letter-spacing: -0.5px; }
+  .kpi .delta { margin-top: 4px; font-size: 12px; color: #6b7280; }
+  .kpi .delta.up { color: #047857; }
+  .kpi .delta.down { color: #b91c1c; }
+
+  /* SECTIONS */
+  h2.section-title {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #111; font-weight: 700; margin: 32px 0 14px;
+    padding-bottom: 8px; border-bottom: 2px solid #111; display: inline-block;
+  }
+
+  /* CHARTS GRID */
+  .charts {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px;
+  }
+  .chart-card {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 20px;
+  }
+  .chart-card h3 { font-size: 14px; font-weight: 600; color: #111; margin-bottom: 12px; }
+  .chart-card .chart-sub { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+  .chart-wrap { position: relative; height: 280px; }
+
+  /* TABLE */
+  .table-card {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 0; overflow: hidden;
+  }
+  .table-head { padding: 16px 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+  .table-head h3 { font-size: 14px; font-weight: 600; }
+  .table-head .toggle { display: flex; gap: 4px; }
+  .table-head .toggle button {
+    border: 1px solid #d1d5db; background: #fff; padding: 5px 10px; border-radius: 6px;
+    font-size: 12px; cursor: pointer; color: #374151; font-weight: 500;
+  }
+  .table-head .toggle button.active { background: #111; color: #fff; border-color: #111; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 11px 16px; text-align: right; border-bottom: 1px solid #f3f4f6; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #6b7280; font-weight: 600; background: #fafafa; }
+  tbody tr:hover { background: #f9fafb; }
+  tbody tr.total-row { font-weight: 700; background: #f3f4f6; }
+  tbody tr.total-row td { border-top: 2px solid #111; border-bottom: none; }
+  .alert { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .alert.crit { background: #fee2e2; color: #b91c1c; }
+  .alert.warn { background: #fef3c7; color: #92400e; }
+  .alert.ok { background: #d1fae5; color: #047857; }
+
+  /* SUMMARY HERO */
+  .hero {
+    background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px 28px;
+    margin-bottom: 28px; display: grid; grid-template-columns: 2fr 3fr; gap: 32px; align-items: center;
+  }
+  .hero .h-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; font-weight: 600; }
+  .hero .h-value { font-size: 38px; font-weight: 900; color: #111; margin-top: 4px; letter-spacing: -1px; }
+  .hero .h-sub { font-size: 13px; color: #6b7280; margin-top: 2px; }
+  .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .hero-stats .s-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; font-weight: 600; }
+  .hero-stats .s-value { font-size: 22px; font-weight: 700; color: #111; margin-top: 4px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 920px) {
+    body { padding: 20px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .charts { grid-template-columns: 1fr; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; text-align: center; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <img class="sael-logo" src="logos/sael.png" alt="Sael">
+    <div class="divider"></div>
+    <div class="subtitle">
+      <strong>Relatório de KPIs</strong>
+      Performance comercial e operacional
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="period">
+      <strong>Jan – Abr 2025</strong>
+      Atualizado em Abr/2025
+    </div>
+    <!-- Brand logo: trocada dinamicamente conforme filtro -->
+    <img id="brandLogo" class="brand-logo" src="" alt="">
+  </div>
+</header>
+
+<!-- HERO / EXECUTIVE SUMMARY -->
+<div class="hero">
+  <div>
+    <div class="h-title">Receita consolidada</div>
+    <div class="h-value" id="hero-revenue">R$ 104,65 MM</div>
+    <div class="h-sub" id="hero-revenue-sub">Janeiro a Abril de 2025</div>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <div class="s-label">Unidades vendidas</div>
+      <div class="s-value" id="hero-units">1.575</div>
+    </div>
+    <div>
+      <div class="s-label">NPS médio</div>
+      <div class="s-value" id="hero-nps">83,5</div>
+    </div>
+    <div>
+      <div class="s-label">Margem média</div>
+      <div class="s-value" id="hero-margin">19,9%</div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="filter-group">
+    <span class="filter-label">Categoria</span>
+    <button class="chip active" data-cat="all">Todas</button>
+    <button class="chip" data-cat="bmw"><span class="dot" style="background:#0166B1"></span>BMW Carros Novos</button>
+    <button class="chip" data-cat="mini"><span class="dot" style="background:#000"></span>MINI</button>
+    <button class="chip" data-cat="motorrad"><span class="dot" style="background:#0166B1"></span>BMW Motorrad</button>
+    <button class="chip" data-cat="seminovos"><span class="dot" style="background:#6b7280"></span>Seminovos</button>
+    <button class="chip" data-cat="jetour"><span class="dot" style="background:#dc2626"></span>Jetour</button>
+    <button class="chip" data-cat="oficina"><span class="dot" style="background:#f59e0b"></span>Oficina</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Mês</span>
+    <button class="chip month-chip active" data-month="all">Todos</button>
+    <button class="chip month-chip" data-month="Jan">Jan</button>
+    <button class="chip month-chip" data-month="Fev">Fev</button>
+    <button class="chip month-chip" data-month="Mar">Mar</button>
+    <button class="chip month-chip" data-month="Abr">Abr</button>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpis" id="kpis">
+  <!-- populated by JS -->
+</div>
+
+<!-- CHARTS -->
+<h2 class="section-title">Evolução Mensal</h2>
+<div class="charts">
+  <div class="chart-card">
+    <h3>Receita por mês</h3>
+    <div class="chart-sub" id="chart1-sub">Comparativo entre categorias selecionadas</div>
+    <div class="chart-wrap"><canvas id="chartRevenue"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>NPS médio</h3>
+    <div class="chart-sub">Satisfação do cliente (0–100)</div>
+    <div class="chart-wrap"><canvas id="chartNps"></canvas></div>
+  </div>
+</div>
+<div class="charts">
+  <div class="chart-card">
+    <h3>Unidades vendidas</h3>
+    <div class="chart-sub">Volume mensal por categoria</div>
+    <div class="chart-wrap"><canvas id="chartUnits"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Margem média (%)</h3>
+    <div class="chart-sub">Margem bruta percentual</div>
+    <div class="chart-wrap"><canvas id="chartMargin"></canvas></div>
+  </div>
+</div>
+
+<!-- TABLE -->
+<h2 class="section-title">Detalhamento</h2>
+<div class="table-card">
+  <div class="table-head">
+    <h3 id="table-title">Vendas mensais — Todas as categorias</h3>
+    <div class="toggle">
+      <button class="active" data-view="vendas">Vendas</button>
+      <button data-view="dsi">Estoque (DSI)</button>
+      <button data-view="funil">Funil de Leads</button>
+      <button data-view="fi">F&amp;I</button>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table id="dataTable">
+      <thead><tr></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Sael • Relatório KPI Jan–Abr 2025 • Capacitação Astra Fluency
+</footer>
+
+<script>
+/* ============= DATA ============= */
+const LOGO_FILES = {
+  all: null,           // mostra apenas a Sael no header esquerdo
+  bmw: "logos/bmw.png",
+  mini: "logos/mini.png",
+  motorrad: "logos/motorrad.png",
+  jetour: "logos/jetour.png",
+  seminovos: null,     // sem logo dedicada — fica em branco
+  oficina: null,       // sem logo dedicada — fica em branco
+};
+
+const DATA = {
+  bmw: {
+    label: "BMW Carros Novos", color: "#0166B1",
+    vendas: [
+      { mes:"Jan", meta:20, real:30, ating:1.50, ticket:499526, receita:14985780, custo:394181, margemBruta:3160350, margemPct:0.2109, clientes:51, nps:82.7 },
+      { mes:"Fev", meta:23, real:23, ating:1.00, ticket:486739, receita:11194997, custo:364135, margemBruta:2819892, margemPct:0.2519, clientes:55, nps:86.5 },
+      { mes:"Mar", meta:22, real:27, ating:1.23, ticket:390498, receita:10543446, custo:289601, margemBruta:2724219, margemPct:0.2584, clientes:46, nps:84.6 },
+      { mes:"Abr", meta:26, real:23, ating:0.88, ticket:505785, receita:11633055, custo:386176, margemBruta:2751007, margemPct:0.2365, clientes:37, nps:79.8 },
+    ],
+    dsi: [
+      { mes:"Jan", estoque:54, vendas:30, dsi:54.0, valor:13423806, custoMensal:434916, alerta:"crit" },
+      { mes:"Fev", estoque:52, vendas:33, dsi:47.3, valor:13017628, custoMensal:369460, alerta:"crit" },
+      { mes:"Mar", estoque:49, vendas:18, dsi:81.7, valor:11420038, custoMensal:559808, alerta:"crit" },
+      { mes:"Abr", estoque:27, vendas:23, dsi:35.2, valor:8250957,  custoMensal:174275, alerta:"warn" },
+    ],
+    funil: [
+      { mes:"Jan", leads:180, visitas:79, propostas:37, vendas:14, tFech:26 },
+      { mes:"Fev", leads:123, visitas:61, propostas:33, vendas:14, tFech:13 },
+      { mes:"Mar", leads:87,  visitas:37, propostas:20, vendas:6,  tFech:17 },
+      { mes:"Abr", leads:148, visitas:67, propostas:43, vendas:13, tFech:25 },
+    ],
+    fi: [
+      { mes:"Jan", vendas:23, fin:14, pctFin:0.609, recFin:42840, seg:7,  recSeg:10864, gar:37233, fiPorVenda:3954 },
+      { mes:"Fev", vendas:20, fin:11, pctFin:0.550, recFin:21065, seg:10, recSeg:9380,  gar:52319, fiPorVenda:4138 },
+      { mes:"Mar", vendas:15, fin:11, pctFin:0.733, recFin:30789, seg:8,  recSeg:13528, gar:44553, fiPorVenda:5925 },
+      { mes:"Abr", vendas:32, fin:20, pctFin:0.625, recFin:54040, seg:16, recSeg:24368, gar:39266, fiPorVenda:3677 },
+    ],
+  },
+  mini: {
+    label: "MINI", color: "#111111",
+    vendas: [
+      { mes:"Jan", meta:9,  real:16, ating:1.78, ticket:260305, receita:4164880, custo:197704, margemBruta:1001616, margemPct:0.2405, clientes:28, nps:83.8 },
+      { mes:"Fev", meta:11, real:16, ating:1.45, ticket:211957, receita:3391312, custo:158584, margemBruta:853968,  margemPct:0.2518, clientes:20, nps:90.3 },
+      { mes:"Mar", meta:13, real:8,  ating:0.62, ticket:196246, receita:1569968, custo:153528, margemBruta:341744,  margemPct:0.2177, clientes:25, nps:86.5 },
+      { mes:"Abr", meta:8,  real:14, ating:1.75, ticket:241014, receita:3374196, custo:183254, margemBruta:808640,  margemPct:0.2397, clientes:28, nps:82.2 },
+    ],
+    dsi: [
+      { mes:"Jan", estoque:44, vendas:29, dsi:45.5, valor:16808044, custoMensal:458868, alerta:"crit" },
+      { mes:"Fev", estoque:27, vendas:24, dsi:33.8, valor:8859564,  custoMensal:179681, alerta:"warn" },
+      { mes:"Mar", estoque:45, vendas:15, dsi:90.0, valor:16796790, custoMensal:907020, alerta:"crit" },
+      { mes:"Abr", estoque:44, vendas:21, dsi:62.9, valor:19685908, custoMensal:742975, alerta:"crit" },
+    ],
+    funil: [
+      { mes:"Jan", leads:161, visitas:70, propostas:38, vendas:16, tFech:11 },
+      { mes:"Fev", leads:113, visitas:70, propostas:45, vendas:23, tFech:14 },
+      { mes:"Mar", leads:129, visitas:74, propostas:41, vendas:17, tFech:15 },
+      { mes:"Abr", leads:119, visitas:62, propostas:38, vendas:18, tFech:18 },
+    ],
+    fi: [
+      { mes:"Jan", vendas:31, fin:17, pctFin:0.548, recFin:31926, seg:18, recSeg:24984, gar:21061, fiPorVenda:2515 },
+      { mes:"Fev", vendas:26, fin:19, pctFin:0.731, recFin:53124, seg:13, recSeg:18252, gar:20516, fiPorVenda:3534 },
+      { mes:"Mar", vendas:28, fin:17, pctFin:0.607, recFin:58871, seg:9,  recSeg:19566, gar:46427, fiPorVenda:4459 },
+      { mes:"Abr", vendas:21, fin:14, pctFin:0.667, recFin:26516, seg:6,  recSeg:9954,  gar:48382, fiPorVenda:4041 },
+    ],
+  },
+  motorrad: {
+    label: "BMW Motorrad", color: "#06A0E2",
+    vendas: [
+      { mes:"Jan", meta:27, real:33, ating:1.22, ticket:70638,  receita:2330962, custo:55000, margemBruta:430000, margemPct:0.18, clientes:33, nps:86.4 },
+      { mes:"Fev", meta:24, real:24, ating:1.00, ticket:57329,  receita:1375894, custo:45000, margemBruta:230000, margemPct:0.17, clientes:24, nps:90.5 },
+      { mes:"Mar", meta:22, real:19, ating:0.86, ticket:64723,  receita:1229730, custo:51000, margemBruta:200000, margemPct:0.16, clientes:19, nps:78.1 },
+      { mes:"Abr", meta:25, real:24, ating:0.96, ticket:60834,  receita:1460022, custo:48000, margemBruta:230000, margemPct:0.16, clientes:24, nps:80.8 },
+    ],
+    dsi: [
+      { mes:"Jan", estoque:49, vendas:16, dsi:91.9, valor:7787619, custoMensal:429449, alerta:"crit" },
+      { mes:"Fev", estoque:41, vendas:33, dsi:37.3, valor:7635102, custoMensal:170871, alerta:"warn" },
+      { mes:"Mar", estoque:45, vendas:28, dsi:48.2, valor:6604335, custoMensal:191017, alerta:"crit" },
+      { mes:"Abr", estoque:48, vendas:33, dsi:43.6, valor:5908896, custoMensal:154562, alerta:"warn" },
+    ],
+    funil: [
+      { mes:"Jan", leads:139, visitas:86, propostas:52, vendas:19, tFech:27 },
+      { mes:"Fev", leads:145, visitas:66, propostas:42, vendas:18, tFech:25 },
+      { mes:"Mar", leads:176, visitas:99, propostas:65, vendas:34, tFech:19 },
+      { mes:"Abr", leads:112, visitas:68, propostas:40, vendas:12, tFech:20 },
+    ],
+    fi: [
+      { mes:"Jan", vendas:30, fin:18, pctFin:0.600, recFin:45018, seg:15, recSeg:21285, gar:17512, fiPorVenda:2794 },
+      { mes:"Fev", vendas:32, fin:18, pctFin:0.563, recFin:37818, seg:14, recSeg:12698, gar:26724, fiPorVenda:2414 },
+      { mes:"Mar", vendas:19, fin:14, pctFin:0.737, recFin:25452, seg:6,  recSeg:9156,  gar:49839, fiPorVenda:4445 },
+      { mes:"Abr", vendas:31, fin:21, pctFin:0.677, recFin:37821, seg:13, recSeg:11713, gar:30854, fiPorVenda:2593 },
+    ],
+  },
+  seminovos: {
+    label: "Seminovos Premium", color: "#6b7280",
+    vendas: [
+      { mes:"Jan", meta:22, real:18, ating:0.82, ticket:332125, receita:5978250, custo:0, margemBruta:1040215, margemPct:0.174, clientes:65, nps:82.7 },
+      { mes:"Fev", meta:18, real:16, ating:0.89, ticket:287583, receita:4601328, custo:0, margemBruta:694800,  margemPct:0.151, clientes:50, nps:88.0 },
+      { mes:"Mar", meta:22, real:20, ating:0.91, ticket:176584, receita:3531680, custo:0, margemBruta:381421,  margemPct:0.108, clientes:31, nps:86.7 },
+      { mes:"Abr", meta:25, real:26, ating:1.04, ticket:278648, receita:7244848, custo:0, margemBruta:1369276, margemPct:0.189, clientes:48, nps:82.9 },
+    ],
+    dsi: [
+      { mes:"Jan", estoque:60, vendas:18, dsi:99.2, valor:19761438, custoMensal:1176214, alerta:"crit" },
+      { mes:"Fev", estoque:51, vendas:16, dsi:95.6, valor:14666733, custoMensal:841280,  alerta:"crit" },
+      { mes:"Mar", estoque:58, vendas:20, dsi:87.0, valor:10241872, custoMensal:534615,  alerta:"crit" },
+      { mes:"Abr", estoque:56, vendas:26, dsi:64.6, valor:15604288, custoMensal:604850,  alerta:"crit" },
+    ],
+    funil: null,
+    fi: null,
+  },
+  jetour: {
+    label: "Jetour", color: "#dc2626",
+    vendas: [
+      { mes:"Jan", meta:23, real:20, ating:0.87, ticket:154481, receita:3089620, custo:122522, margemBruta:639180, margemPct:0.2069, clientes:55, nps:75.1 },
+      { mes:"Fev", meta:25, real:26, ating:1.04, ticket:161648, receita:4202848, custo:128061, margemBruta:873262, margemPct:0.2078, clientes:45, nps:79.3 },
+      { mes:"Mar", meta:29, real:23, ating:0.79, ticket:183768, receita:4226664, custo:153414, margemBruta:698142, margemPct:0.1652, clientes:47, nps:88.2 },
+      { mes:"Abr", meta:30, real:22, ating:0.73, ticket:169137, receita:3721014, custo:140505, margemBruta:629904, margemPct:0.1693, clientes:38, nps:83.4 },
+    ],
+    dsi: [
+      { mes:"Jan", estoque:39, vendas:33, dsi:35.5, valor:5392491, custoMensal:114843, alerta:"warn" },
+      { mes:"Fev", estoque:50, vendas:33, dsi:45.5, valor:9981200, custoMensal:272500, alerta:"crit" },
+      { mes:"Mar", estoque:39, vendas:18, dsi:65.0, valor:4832256, custoMensal:188435, alerta:"crit" },
+      { mes:"Abr", estoque:45, vendas:34, dsi:39.7, valor:7825590, custoMensal:186392, alerta:"warn" },
+    ],
+    funil: [
+      { mes:"Jan", leads:152, visitas:78, propostas:49, vendas:21, tFech:8 },
+      { mes:"Fev", leads:92,  visitas:54, propostas:27, vendas:13, tFech:20 },
+      { mes:"Mar", leads:119, visitas:57, propostas:32, vendas:12, tFech:26 },
+      { mes:"Abr", leads:92,  visitas:54, propostas:25, vendas:11, tFech:21 },
+    ],
+    fi: [
+      { mes:"Jan", vendas:21, fin:12, pctFin:0.571, recFin:39432, seg:9,  recSeg:17496, gar:48700, fiPorVenda:5030 },
+      { mes:"Fev", vendas:18, fin:12, pctFin:0.667, recFin:22560, seg:10, recSeg:21930, gar:19704, fiPorVenda:3566 },
+      { mes:"Mar", vendas:26, fin:14, pctFin:0.538, recFin:33166, seg:11, recSeg:11726, gar:20864, fiPorVenda:2529 },
+      { mes:"Abr", vendas:15, fin:9,  pctFin:0.600, recFin:16848, seg:8,  recSeg:10592, gar:44070, fiPorVenda:4767 },
+    ],
+  },
+  oficina: {
+    label: "Oficina", color: "#f59e0b",
+    vendas: [
+      { mes:"Jan", meta:380, real:353, ating:0.93, ticket:530.89,  receita:187404, custo:0, margemBruta:58095, margemPct:0.31, clientes:353, nps:88.0 },
+      { mes:"Fev", meta:380, real:250, ating:0.66, ticket:806.04,  receita:201509, custo:0, margemBruta:62468, margemPct:0.31, clientes:250, nps:74.5 },
+      { mes:"Mar", meta:300, real:284, ating:0.95, ticket:788.74,  receita:224002, custo:0, margemBruta:69441, margemPct:0.31, clientes:284, nps:82.7 },
+      { mes:"Abr", meta:330, real:260, ating:0.79, ticket:720.25,  receita:187265, custo:0, margemBruta:58052, margemPct:0.31, clientes:260, nps:80.6 },
+    ],
+    dsi: null,
+    funil: null,
+    fi: null,
+  },
+};
+
+/* ============= STATE ============= */
+let state = { cat: "all", month: "all", view: "vendas" };
+
+/* ============= HELPERS ============= */
+const fmtMoney = (v) => {
+  if (v === null || v === undefined) return "—";
+  if (Math.abs(v) >= 1e6) return "R$ " + (v/1e6).toFixed(2).replace('.',',') + " MM";
+  if (Math.abs(v) >= 1e3) return "R$ " + (v/1e3).toFixed(0).replace('.',',') + "k";
+  return "R$ " + v.toLocaleString("pt-BR");
+};
+const fmtMoneyFull = (v) => "R$ " + (v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+const fmtPct = (v) => v === null || v === undefined ? "—" : (v*100).toFixed(1).replace('.',',') + "%";
+const fmtNum = (v) => v === null || v === undefined ? "—" : v.toLocaleString("pt-BR");
+const fmtDec = (v, d=1) => v === null || v === undefined ? "—" : v.toFixed(d).replace('.',',');
+
+const MONTHS = ["Jan","Fev","Mar","Abr"];
+
+function getActiveCats() {
+  return state.cat === "all" ? Object.keys(DATA) : [state.cat];
+}
+function getMonths() {
+  return state.month === "all" ? MONTHS : [state.month];
+}
+
+/* ============= AGGREGATES ============= */
+function aggregate() {
+  const cats = getActiveCats();
+  const months = getMonths();
+  let receita = 0, unidades = 0, npsSum = 0, npsCount = 0, margemSum = 0, margemCount = 0;
+  let clientes = 0;
+  cats.forEach(c => {
+    const data = DATA[c];
+    if (!data?.vendas) return;
+    data.vendas.forEach(r => {
+      if (!months.includes(r.mes)) return;
+      receita += r.receita || 0;
+      unidades += r.real || 0;
+      if (r.nps != null) { npsSum += r.nps; npsCount++; }
+      if (r.margemPct != null) { margemSum += r.margemPct; margemCount++; }
+      clientes += r.clientes || 0;
+    });
+  });
+  return {
+    receita,
+    unidades,
+    npsAvg: npsCount ? npsSum/npsCount : 0,
+    margemAvg: margemCount ? margemSum/margemCount : 0,
+    clientes,
+  };
+}
+
+/* ============= RENDER ============= */
+function renderHero() {
+  const a = aggregate();
+  document.getElementById("hero-revenue").textContent = fmtMoney(a.receita);
+  document.getElementById("hero-units").textContent = fmtNum(a.unidades);
+  document.getElementById("hero-nps").textContent = fmtDec(a.npsAvg, 1).replace('.',',');
+  document.getElementById("hero-margin").textContent = fmtPct(a.margemAvg);
+  const catLabel = state.cat === "all" ? "Todas as categorias" : DATA[state.cat].label;
+  const monthLabel = state.month === "all" ? "Jan–Abr 2025" : state.month + "/2025";
+  document.getElementById("hero-revenue-sub").textContent = catLabel + " • " + monthLabel;
+}
+
+function renderKpis() {
+  const a = aggregate();
+  const cats = getActiveCats();
+  // Compute additional aggregates
+  let leadsTot = 0, vendasFunil = 0, dsiAvg = 0, dsiCount = 0, financeiroPct = 0, financeiroCount = 0;
+  cats.forEach(c => {
+    const d = DATA[c];
+    const months = getMonths();
+    if (d?.funil) d.funil.forEach(r => { if (months.includes(r.mes)) { leadsTot += r.leads; vendasFunil += r.vendas; } });
+    if (d?.dsi)   d.dsi.forEach(r => { if (months.includes(r.mes)) { dsiAvg += r.dsi; dsiCount++; } });
+    if (d?.fi)    d.fi.forEach(r => { if (months.includes(r.mes)) { financeiroPct += r.pctFin; financeiroCount++; } });
+  });
+  const convLeadVenda = leadsTot > 0 ? vendasFunil / leadsTot : null;
+  const dsiMedio = dsiCount > 0 ? dsiAvg / dsiCount : null;
+  const finPctMedio = financeiroCount > 0 ? financeiroPct / financeiroCount : null;
+
+  const html = `
+    <div class="kpi">
+      <div class="label">Receita</div>
+      <div class="value">${fmtMoney(a.receita)}</div>
+      <div class="delta">${fmtMoneyFull(a.receita)}</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Unidades</div>
+      <div class="value">${fmtNum(a.unidades)}</div>
+      <div class="delta">${fmtNum(a.clientes)} clientes atendidos</div>
+    </div>
+    <div class="kpi">
+      <div class="label">NPS Médio</div>
+      <div class="value">${fmtDec(a.npsAvg,1).replace('.',',')}</div>
+      <div class="delta ${a.npsAvg >= 80 ? 'up' : (a.npsAvg >= 70 ? '' : 'down')}">${a.npsAvg >= 80 ? 'Excelente' : (a.npsAvg >= 70 ? 'Bom' : 'Atenção')}</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Margem Média</div>
+      <div class="value">${fmtPct(a.margemAvg)}</div>
+      <div class="delta">${dsiMedio !== null ? 'DSI médio: ' + fmtDec(dsiMedio,1).replace('.',',') + ' dias' : '—'}</div>
+    </div>
+  `;
+  document.getElementById("kpis").innerHTML = html;
+}
+
+/* ============= CHARTS ============= */
+let charts = {};
+function destroyCharts() {
+  Object.values(charts).forEach(c => c?.destroy?.());
+  charts = {};
+}
+
+function buildSeries(metric) {
+  const cats = getActiveCats();
+  const months = MONTHS;
+  return cats.map(c => {
+    const d = DATA[c];
+    const data = months.map(m => {
+      const row = d?.vendas?.find(r => r.mes === m);
+      if (!row) return 0;
+      if (state.month !== "all" && row.mes !== state.month) return 0;
+      switch(metric) {
+        case "receita": return row.receita || 0;
+        case "unidades": return row.real || 0;
+        case "nps": return row.nps || 0;
+        case "margem": return (row.margemPct || 0) * 100;
+      }
+    });
+    return { label: d.label, data, color: d.color };
+  });
+}
+
+function renderCharts() {
+  destroyCharts();
+  const months = MONTHS;
+  const tickColor = "#6b7280";
+  const gridColor = "#f3f4f6";
+
+  const commonOpts = (titleY, formatter) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "bottom", labels: { color: "#374151", font: { size: 11 }, boxWidth: 10, boxHeight: 10, padding: 12 } },
+      tooltip: {
+        backgroundColor: "#111", titleColor: "#fff", bodyColor: "#fff", padding: 10, cornerRadius: 6,
+        callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatter(ctx.parsed.y)}` }
+      },
+    },
+    interaction: { mode: "index", intersect: false },
+    scales: {
+      x: { ticks: { color: tickColor }, grid: { display: false } },
+      y: { ticks: { color: tickColor, callback: formatter }, grid: { color: gridColor }, title: { display: false } },
+    }
+  });
+
+  // Revenue
+  const r = buildSeries("receita");
+  charts.revenue = new Chart(document.getElementById("chartRevenue"), {
+    type: "bar",
+    data: { labels: months, datasets: r.map(s => ({ label: s.label, data: s.data, backgroundColor: s.color + "DD", borderColor: s.color, borderWidth: 0, borderRadius: 4 })) },
+    options: commonOpts("R$", v => "R$ " + (v/1e6).toFixed(1).replace('.',',') + "M")
+  });
+
+  // NPS
+  const n = buildSeries("nps");
+  charts.nps = new Chart(document.getElementById("chartNps"), {
+    type: "line",
+    data: { labels: months, datasets: n.map(s => ({ label: s.label, data: s.data, borderColor: s.color, backgroundColor: s.color + "22", tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 })) },
+    options: { ...commonOpts("", v => v.toFixed(0)), scales: { x: { ticks: { color: tickColor }, grid: { display: false } }, y: { min: 60, max: 100, ticks: { color: tickColor }, grid: { color: gridColor } } } }
+  });
+
+  // Units
+  const u = buildSeries("unidades");
+  charts.units = new Chart(document.getElementById("chartUnits"), {
+    type: "bar",
+    data: { labels: months, datasets: u.map(s => ({ label: s.label, data: s.data, backgroundColor: s.color + "DD", borderRadius: 4 })) },
+    options: commonOpts("", v => v.toString())
+  });
+
+  // Margin
+  const m = buildSeries("margem");
+  charts.margin = new Chart(document.getElementById("chartMargin"), {
+    type: "line",
+    data: { labels: months, datasets: m.map(s => ({ label: s.label, data: s.data, borderColor: s.color, backgroundColor: s.color + "22", tension: 0.35, fill: false, pointRadius: 4, borderWidth: 2 })) },
+    options: { ...commonOpts("%", v => v.toFixed(1) + "%"), scales: { x: { ticks: { color: tickColor }, grid: { display: false } }, y: { ticks: { color: tickColor, callback: v => v + "%" }, grid: { color: gridColor } } } }
+  });
+}
+
+/* ============= TABLE ============= */
+function renderTable() {
+  const view = state.view;
+  const cats = getActiveCats();
+  const months = getMonths();
+  const headRow = document.querySelector("#dataTable thead tr");
+  const tbody = document.querySelector("#dataTable tbody");
+  const titleEl = document.getElementById("table-title");
+
+  const catLabel = state.cat === "all" ? "Todas as categorias" : DATA[state.cat].label;
+
+  let columns = [];
+  let rows = [];
+
+  if (view === "vendas") {
+    titleEl.textContent = "Vendas mensais — " + catLabel;
+    columns = ["Categoria","Mês","Meta","Realizado","Ating. Meta","Receita","Margem %","NPS"];
+    cats.forEach(c => {
+      const d = DATA[c];
+      d.vendas.forEach(r => {
+        if (!months.includes(r.mes)) return;
+        rows.push({
+          cells: [d.label, r.mes, fmtNum(r.meta), fmtNum(r.real), fmtPct(r.ating), fmtMoney(r.receita), fmtPct(r.margemPct), fmtDec(r.nps,1).replace('.',',')],
+        });
+      });
+    });
+  } else if (view === "dsi") {
+    titleEl.textContent = "DSI - Estoque & Custo de Capital — " + catLabel;
+    columns = ["Categoria","Mês","Estoque Médio","Vendas no Mês","DSI (dias)","Valor Estoque","Custo Mensal Parado","Alerta"];
+    cats.forEach(c => {
+      const d = DATA[c];
+      if (!d.dsi) return;
+      d.dsi.forEach(r => {
+        if (!months.includes(r.mes)) return;
+        const alertText = r.alerta === "crit" ? "Crítico" : (r.alerta === "warn" ? "Atenção" : "OK");
+        rows.push({
+          cells: [d.label, r.mes, fmtNum(r.estoque), fmtNum(r.vendas), fmtDec(r.dsi,1).replace('.',','), fmtMoney(r.valor), fmtMoney(r.custoMensal), `<span class="alert ${r.alerta}">${alertText}</span>`],
+          html: true,
+        });
+      });
+    });
+  } else if (view === "funil") {
+    titleEl.textContent = "Funil de Conversão de Leads — " + catLabel;
+    columns = ["Categoria","Mês","Leads","Visitas","Propostas","Vendas","Conv. Lead→Venda","T. Médio Fech. (dias)"];
+    cats.forEach(c => {
+      const d = DATA[c];
+      if (!d.funil) return;
+      d.funil.forEach(r => {
+        if (!months.includes(r.mes)) return;
+        const conv = r.leads > 0 ? r.vendas/r.leads : 0;
+        rows.push({
+          cells: [d.label, r.mes, fmtNum(r.leads), fmtNum(r.visitas), fmtNum(r.propostas), fmtNum(r.vendas), fmtPct(conv), fmtNum(r.tFech)],
+        });
+      });
+    });
+  } else if (view === "fi") {
+    titleEl.textContent = "F&I — Finance & Insurance — " + catLabel;
+    columns = ["Categoria","Mês","Vendas","% Financiamento","Receita Financ.","Seguros","Receita Seguros","Garantia Estendida","F&I por Venda"];
+    cats.forEach(c => {
+      const d = DATA[c];
+      if (!d.fi) return;
+      d.fi.forEach(r => {
+        if (!months.includes(r.mes)) return;
+        rows.push({
+          cells: [d.label, r.mes, fmtNum(r.vendas), fmtPct(r.pctFin), fmtMoney(r.recFin), fmtNum(r.seg), fmtMoney(r.recSeg), fmtMoney(r.gar), fmtMoney(r.fiPorVenda)],
+        });
+      });
+    });
+  }
+
+  headRow.innerHTML = columns.map(c => `<th>${c}</th>`).join("");
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${columns.length}" style="text-align:center;color:#9ca3af;padding:40px">Sem dados para essa combinação de filtros.</td></tr>`;
+  } else {
+    tbody.innerHTML = rows.map(r => `<tr>${r.cells.map(c => `<td>${c}</td>`).join("")}</tr>`).join("");
+  }
+}
+
+/* ============= BRAND LOGO ============= */
+function renderBrandLogo() {
+  const img = document.getElementById("brandLogo");
+  const file = LOGO_FILES[state.cat];
+  if (file) {
+    if (img.getAttribute("src") !== file) img.setAttribute("src", file);
+    img.alt = DATA[state.cat]?.label || "";
+    img.classList.add("visible");
+  } else {
+    img.classList.remove("visible");
+    // limpar src para acessibilidade
+    img.removeAttribute("src");
+    img.alt = "";
+  }
+}
+
+/* ============= EVENTS ============= */
+function renderAll() { renderHero(); renderKpis(); renderCharts(); renderTable(); renderBrandLogo(); }
+
+document.querySelectorAll(".chip[data-cat]").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".chip[data-cat]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.cat = b.dataset.cat;
+    renderAll();
+  });
+});
+document.querySelectorAll(".chip[data-month]").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".chip[data-month]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.month = b.dataset.month;
+    renderAll();
+  });
+});
+document.querySelectorAll(".table-head .toggle button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".table-head .toggle button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.view = b.dataset.view;
+    renderTable();
+  });
+});
+
+/* INIT */
+renderAll();
+</script>
+</body>
+</html>
